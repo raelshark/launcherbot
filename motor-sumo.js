@@ -1,0 +1,269 @@
+'use strict';
+
+var five = require('johnny-five');
+var board = new five.Board();
+var keypress = require('keypress');
+// var cfble = require('crazyflie-ble');
+var CF2 = require('crazyflie2-ble');
+var conn = CF2.getConnection();
+
+board.on('ready', function() {
+  // Use your shield configuration from the list
+  // http://johnny-five.io/api/motor/#pre-packaged-shield-configs
+  var configs = five.Motor.SHIELD_CONFIGS.ADAFRUIT_V1;
+  var motors = new five.Motors([
+    configs.M1,
+    configs.M2
+  ]);
+
+  // If you want to add a servo to your motor shield:
+  // You can also use continuous servos: new five.Servo.Continuous(10)
+  var servo1 = new five.Servo(10);
+
+  // Requires soldering lead to A0 pin on motor controller
+  // http://johnny-five.io/examples/proximity-hcsr04-analog/
+  // var proximity = new five.Proximity({
+  //   controller: 'HCSR04',
+  //   pin: 'A0'
+  // });
+
+  // Requires soldering lead to D3 pin on motor controller
+  // new five.Piezo({
+  //   pin: 3
+  // });
+
+  this.repl.inject({
+    motors: motors,
+    servo1: servo1
+  });
+
+  console.log('Welcome to the Motorized SumoBot!');
+  console.log('Control the bot with the arrow keys, and SPACE to stop.');
+
+  function forward() {
+    console.log('Going forward');
+    motors.fwd(230);
+  }
+
+  function backward() {
+    console.log('Going backward');
+    motors.rev(230);
+  }
+
+  function left() {
+    console.log('Going left');
+    motors[0].rev(200);
+    motors[1].fwd(200);
+  }
+
+  function right() {
+    console.log('Going right');
+    motors[1].rev(200);
+    motors[0].fwd(200);
+  }
+
+  function stop() {
+    motors.stop();
+
+    // Optionally, stop servos from sweeping
+    servo1.stop();
+  }
+
+  function sweep() {
+    console.log('Sweep the leg!!');
+
+    // Sweep from 0-180 (repeat)
+    servo1.sweep();
+  }
+
+  function turbo() {
+    console.log('Turbo button engaged!');
+
+    motors.fwd(255);
+  }
+
+  function attack() {
+    console.log('Attack!');
+
+    motors.fwd(100);
+    var myVar = setTimeout(phase2, 1000);
+  }
+
+  function phase2() {
+    motors.stop();
+
+    launch();
+
+    console.log("launching!")
+  }
+
+  keypress(process.stdin);
+  process.stdin.resume();
+  process.stdin.setEncoding('utf8');
+  process.stdin.setRawMode(true);
+  process.stdin.on('keypress', function (ch, key) {
+
+    if ( !key ) { return; }
+
+    if ( key.name === 'q' ) {
+
+      console.log('Quitting');
+      stop();
+      process.exit();
+
+    } else if ( key.name === 'up' ) {
+
+      forward();
+
+    } else if ( key.name === 'down' ) {
+
+      backward();
+
+    } else if ( key.name === 'left' ) {
+
+      left();
+
+    } else if ( key.name === 'right' ) {
+
+      right();
+
+    } else if ( key.name === 'space' ) {
+
+      stop();
+
+    } else if ( key.name === 's' ) {
+
+      sweep();
+
+    } else if ( key.name === 't' ) {
+
+      turbo();
+
+    } else if ( key.name === 'a' ) {
+
+      attack();
+
+    } else if ( key.name === 'h' ) {
+
+      console.log('hover test');
+      //cfble.Crazyflie(hover);
+      launch();
+    }
+  });
+});
+
+// cfble.Crazyflie(function(err, cf){
+//
+//     if (err) {
+//         return console.log("Could not connect to Crazyflie");
+//     }
+//
+//     // Perform actions with crazyflie here
+//     ...
+//
+// })
+
+// var hover = function(err, cf) {
+//
+//   console.log('Testing Crazyflie');
+//
+// 	if (err || !cf) {
+// 		console.log('Could not connect to Crazyflie');
+// 		process.exit(0);
+// 	}
+//
+// 	cf.setThrust(40000); // Adjust as needed
+// 	console.log("Thrust now set to: " + cf.thrust);
+//
+// 	cf.start();
+// 	console.log('Crazyflie now starting...');
+//
+// 	cf.sendParam(11, 'b', 1); // Set the hover param
+//
+// 	var i = 1; // 20 seconds
+// 	i *= 2; // double it since we are sending every half a second
+// 	var interval = setInterval(function(){ // Send 32767 to make CF hover
+// 		cf.sendAll(0, 0, 0, 32767);
+// 		i--;
+// 		if(i == 0){
+// 			clearInterval(interval);
+// 			cf.sendParam(11, 'b', 0); // Clear the hover param
+// 			cf.stop();
+// 			console.log('Crazyflie now stopping...');
+// 		}
+// 	}, 500);
+// };
+
+var launch = function() {
+  console.log("Connecting to Crazyflie");
+  conn.then(function (crazyflie) {
+
+      console.log('take off');
+      crazyflie.setThrust(42000);
+
+      setTimeout(hover, 2000, crazyflie);
+
+  }).catch(function (error) {
+      // Something went wrong :(
+      console.error("outer", error.message);
+  });
+}
+
+var hover = function (crazyflie){
+  console.log('hover');
+  crazyflie.setThrust(38000);
+
+  setTimeout(descend, 2000, crazyflie);
+}
+
+var descend = function (crazyflie){
+  console.log('land');
+  crazyflie.setThrust(0);
+}
+
+
+// var crazyflie = function() {
+//
+//   console.log("Crazyflie ready");
+//
+//   keypress(process.stdin);
+//   process.stdin.resume();
+//   process.stdin.setEncoding('utf8');
+//   process.stdin.setRawMode(true);
+//   process.stdin.on('keypress', function (ch, key) {
+//
+//     if ( !key ) { return; }
+//
+//     if ( key.name === 'q' ) {
+//
+//       console.log('Quitting');
+//       //stop();
+//       process.exit();
+//
+//     } else if ( key.name === 'up' ) {
+//       console.log("launch!");
+//
+//       launch();
+//
+//     }
+//   });
+// }
+//
+// crazyflie();
+
+//
+// var hover = function() {
+//
+// }
+
+// conn.then(function (crazyflie) {
+//     crazyflie.setThrust(20000);
+//
+//     setTimeout(function () {
+//         crazyflie.setThrust(0);
+//     }, 2000)
+// }).catch(function (error) {
+//     // Something went wrong :(
+// });
+
+//setTimeout(launch, 1000);
