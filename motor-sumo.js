@@ -20,18 +20,6 @@ board.on('ready', function() {
   // You can also use continuous servos: new five.Servo.Continuous(10)
   var servo1 = new five.Servo(10);
 
-  // Requires soldering lead to A0 pin on motor controller
-  // http://johnny-five.io/examples/proximity-hcsr04-analog/
-  // var proximity = new five.Proximity({
-  //   controller: 'HCSR04',
-  //   pin: 'A0'
-  // });
-
-  // Requires soldering lead to D3 pin on motor controller
-  // new five.Piezo({
-  //   pin: 3
-  // });
-
   this.repl.inject({
     motors: motors,
     servo1: servo1
@@ -146,53 +134,11 @@ board.on('ready', function() {
     } else if ( key.name === 'h' ) {
 
       console.log('hover test');
-      //cfble.Crazyflie(hover);
       launch();
+
     }
   });
 });
-
-// cfble.Crazyflie(function(err, cf){
-//
-//     if (err) {
-//         return console.log("Could not connect to Crazyflie");
-//     }
-//
-//     // Perform actions with crazyflie here
-//     ...
-//
-// })
-
-// var hover = function(err, cf) {
-//
-//   console.log('Testing Crazyflie');
-//
-// 	if (err || !cf) {
-// 		console.log('Could not connect to Crazyflie');
-// 		process.exit(0);
-// 	}
-//
-// 	cf.setThrust(40000); // Adjust as needed
-// 	console.log("Thrust now set to: " + cf.thrust);
-//
-// 	cf.start();
-// 	console.log('Crazyflie now starting...');
-//
-// 	cf.sendParam(11, 'b', 1); // Set the hover param
-//
-// 	var i = 1; // 20 seconds
-// 	i *= 2; // double it since we are sending every half a second
-// 	var interval = setInterval(function(){ // Send 32767 to make CF hover
-// 		cf.sendAll(0, 0, 0, 32767);
-// 		i--;
-// 		if(i == 0){
-// 			clearInterval(interval);
-// 			cf.sendParam(11, 'b', 0); // Clear the hover param
-// 			cf.stop();
-// 			console.log('Crazyflie now stopping...');
-// 		}
-// 	}, 500);
-// };
 
 var launch = function() {
   console.log("Connecting to Crazyflie");
@@ -220,50 +166,3 @@ var descend = function (crazyflie){
   console.log('land');
   crazyflie.setThrust(0);
 }
-
-
-// var crazyflie = function() {
-//
-//   console.log("Crazyflie ready");
-//
-//   keypress(process.stdin);
-//   process.stdin.resume();
-//   process.stdin.setEncoding('utf8');
-//   process.stdin.setRawMode(true);
-//   process.stdin.on('keypress', function (ch, key) {
-//
-//     if ( !key ) { return; }
-//
-//     if ( key.name === 'q' ) {
-//
-//       console.log('Quitting');
-//       //stop();
-//       process.exit();
-//
-//     } else if ( key.name === 'up' ) {
-//       console.log("launch!");
-//
-//       launch();
-//
-//     }
-//   });
-// }
-//
-// crazyflie();
-
-//
-// var hover = function() {
-//
-// }
-
-// conn.then(function (crazyflie) {
-//     crazyflie.setThrust(20000);
-//
-//     setTimeout(function () {
-//         crazyflie.setThrust(0);
-//     }, 2000)
-// }).catch(function (error) {
-//     // Something went wrong :(
-// });
-
-//setTimeout(launch, 1000);
