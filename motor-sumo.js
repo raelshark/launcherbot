@@ -7,7 +7,9 @@ var keypress = require('keypress');
 var CF2 = require('crazyflie2-ble');
 var conn = CF2.getConnection();
 
-board.on('ready', function() {
+// var player = require('play-sound')(opts = {});
+
+board.on('ready', function () {
   // Use your shield configuration from the list
   // http://johnny-five.io/api/motor/#pre-packaged-shield-configs
   var configs = five.Motor.SHIELD_CONFIGS.ADAFRUIT_V1;
@@ -74,7 +76,7 @@ board.on('ready', function() {
     console.log('Attack!');
 
     motors.fwd(100);
-    var myVar = setTimeout(phase2, 1000);
+    setTimeout(phase2, 1000);
   }
 
   function phase2() {
@@ -82,7 +84,7 @@ board.on('ready', function() {
 
     launch();
 
-    console.log("launching!")
+    console.log('launching!');
   }
 
   keypress(process.stdin);
@@ -90,79 +92,53 @@ board.on('ready', function() {
   process.stdin.setEncoding('utf8');
   process.stdin.setRawMode(true);
   process.stdin.on('keypress', function (ch, key) {
-
     if ( !key ) { return; }
-
     if ( key.name === 'q' ) {
-
       console.log('Quitting');
       stop();
       process.exit();
-
     } else if ( key.name === 'up' ) {
-
       forward();
-
     } else if ( key.name === 'down' ) {
-
       backward();
-
     } else if ( key.name === 'left' ) {
-
       left();
-
     } else if ( key.name === 'right' ) {
-
       right();
-
     } else if ( key.name === 'space' ) {
-
       stop();
-
     } else if ( key.name === 's' ) {
-
       sweep();
-
     } else if ( key.name === 't' ) {
-
       turbo();
-
     } else if ( key.name === 'a' ) {
-
       attack();
-
     } else if ( key.name === 'h' ) {
-
       console.log('hover test');
       launch();
-
     }
   });
 });
 
-var launch = function() {
-  console.log("Connecting to Crazyflie");
+var launch = function () {
+  console.log('Connecting to Crazyflie');
   conn.then(function (crazyflie) {
-
-      console.log('take off');
-      crazyflie.setThrust(42000);
-
-      setTimeout(hover, 2000, crazyflie);
-
+    console.log('take off');
+    crazyflie.setThrust(42000);
+    setTimeout(hover, 2000, crazyflie);
   }).catch(function (error) {
-      // Something went wrong :(
-      console.error("outer", error.message);
+    // Something went wrong :(
+    console.error('outer', error.message);
   });
-}
+};
 
-var hover = function (crazyflie){
+var hover = function (crazyflie) {
   console.log('hover');
   crazyflie.setThrust(38000);
 
   setTimeout(descend, 2000, crazyflie);
-}
-
-var descend = function (crazyflie){
+};
+var descend = function (crazyflie) {
   console.log('land');
   crazyflie.setThrust(0);
-}
+};
